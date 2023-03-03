@@ -163,9 +163,10 @@ class PervasiveServerConnect():
         '''
 		Initializing connection to Pervasive server
 		'''
+        #server time out currently set to 30 seconds. 
         try:
             connect_string = 'DRIVER=Pervasive ODBC Interface;SERVERNAME={server_address};DBQ={db}'
-            self.connection = pyodbc.connect(connect_string.format(db=database, server_address=self.server))
+            self.connection = pyodbc.connect(connect_string.format(db=database, server_address=self.server), timeout=30)
             
         except Exception as e:
             raise ConnectionError('Failed to connect to server\n'+str(e))
@@ -180,6 +181,7 @@ class PervasiveServerConnect():
         ''' 
         connection = None
         cursor = None
+        error_counter = 0
         try:
             connection = self.make_P_connection(database)
             cursor = connection.cursor()
@@ -188,7 +190,14 @@ class PervasiveServerConnect():
 
         except Exception as e:
             print(e)
-
+            #trying to reconnect
+            if error_counter < 3:
+                error_counter += 1
+                try:
+                    self.query_pervasive()
+                except:
+                     raise Exception("Couldnt re-run pervasive query...")
+        error_counter = 0
 
         
     def close(self):
