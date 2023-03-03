@@ -41,35 +41,34 @@ full_server_list = df['ProdigyDatabaseName'].dropna().to_list()
 
 
 #use for testing. N number of Databases
-one_hundred = random.sample(full_server_list, 100)
-print(f"Length of test databases being passed: {len(one_hundred)}")
+# one_hundred = random.sample(full_server_list, 100)
+# print(f"Length of test databases being passed: {len(one_hundred)}")
 
 
 
 logger.info("Begin ThreadPool...")
-with ThreadPoolExecutor(len(one_hundred)) as executor:
-    data = list(executor.map(pervasive.query_pervasive, one_hundred))
-    countinfo = list(executor.map(record_count.query_pervasive, one_hundred))
+with ThreadPoolExecutor(len(full_server_list)) as executor:
+    data = list(executor.map(pervasive.query_pervasive, full_server_list))
+    countinfo = list(executor.map(record_count.query_pervasive, full_server_list))
 
 logger.info("Threading complete")
 
 try:
     logger.info("Combining MHA data")
+    #all data from pervasive 
     joined = pd.concat(data).reset_index(drop=True)
     logger.info("Done!")
     
     logger.info("Combining Table Sum data ")
     count_info = pd.concat(countinfo).reset_index(drop=True)
     logger.info("Done!")
-    count_info['sites'] = one_hundred
+    count_info['sites'] = full_server_list
     logger.info("Creating CSV...")
     count_info.to_csv('MHA_row_counts.csv')
     logger.info("Done!")
 except Exception as e:
     print(f"Error: {e}")
     logger.error(f"Error: {e}")
-
-
 
 
 sql_table_name = 'MHA_clone'
