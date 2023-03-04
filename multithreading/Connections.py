@@ -4,6 +4,9 @@ from sqlalchemy import create_engine
 import pandas as pd
 from sqlalchemy import text
 
+## Written by: Dan Rossano
+## DAte: 3/3/2023
+
 
 class SQLServerConnect():
 
@@ -188,15 +191,17 @@ class PervasiveServerConnect():
             rows = cursor.execute(self.sql).fetchall()
             return pd.DataFrame.from_records(rows, columns=[col[0] for col in cursor.description])
 
-        except Exception as e:
-            print(e)
+        #changed Exception (which catches everything) to just except in order to manage error handling.
+        except:
+            print("There was an error with the connection")
             #trying to reconnect
             if error_counter < 3:
                 error_counter += 1
                 try:
+                    print("Attempting to reconnect...")
                     self.query_pervasive()
                 except:
-                     raise Exception("Couldnt re-run pervasive query...")
+                     raise Exception("Couldnt re-run pervasive query after 3 tries...")
         error_counter = 0
 
         
