@@ -13,7 +13,10 @@ logger.addHandler(file_handler)
 ## NOTES: Fixed sitename from dropping! :) 
 
 def clean_up_df(df, sql_table_name, output_file_name, full_server_df, append="append"):
-    mhadb = SQLServerConnect(server='W2D-SQLDW01', database='MHADB')
+    try:
+        mhadb = SQLServerConnect(server='W2D-SQLDW01', database='MHADB')
+    except:
+        mhadb = SQLServerConnect(server='W2P-SQLDW01', database='MHADB')
     logger.info("modifying dataframe..")
     try:
         df.replace({False: 0, True: 1}, inplace=True)
